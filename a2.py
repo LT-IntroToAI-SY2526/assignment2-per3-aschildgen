@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 
 def match(pattern: List[str], source: List[str]) -> List[str]:
@@ -21,31 +21,49 @@ def match(pattern: List[str], source: List[str]) -> List[str]:
     # keep checking as long as we haven't hit the end of either pattern or source while
     # pind is still a valid index OR sind is still a valid index (valid index means that
     # the index is != to the length of the list)
-    while "FILL IN CONDITION HERE":
-        # your job is to fill out the body of this loop
-
-        # you should delete the following line
-        return ["Not done yet :)"]
-
-        # 1) if we reached the end of the pattern but not source
+    def helper(pind: int, sind: int) -> Optional[List[str]]:
+        if pind == len(pattern) and sind == len(source):
+            return []
+        if pind == len(pattern):
+            return None
 
         # 2) if the current thing in the pattern is a %
-        # WARNING: this condition contains the bulk of the code for the assignment
-        # If you get stuck on this one, we encourage you to attempt the other conditions
-        #   and come back to this one afterwards
+        if pind < len(pattern) and pattern[pind] == '%':
+            if pind == len(pattern) - 1:
+                return [' '.join(source[sind:])]
+            next_pat = pattern[pind + 1]
+            for i in range(sind, len(source) + 1):
+                if i < len(source) and (next_pat == '_' or next_pat == source[i]):
+                    sub_res = helper(pind + 1, i)
+                    if sub_res is not None:
+                        matched = ' '.join(source[sind:i])
+                        return [matched] + sub_res
+                elif i == len(source) and next_pat != '%':
+                    return None
+            return None
 
         # 3) if we reached the end of the source but not the pattern
+        if sind == len(source):
+            return None
 
         # 4) if the current thing in the pattern is an _
+        if pattern[pind] == '_':
+            sub_res = helper(pind + 1, sind + 1)
+            if sub_res is not None:
+                return [source[sind]] + sub_res
+            return None
 
         # 5) if the current thing in the pattern is the same as the current thing in the
         # source
+        if pattern[pind] == source[sind]:
+            return helper(pind + 1, sind + 1)
 
         # 6) else : this will happen if none of the other conditions are met it
         # indicates the current thing it pattern doesn't match the current thing in
         # source
+        return None
 
-    return result
+    return helper(0, 0)
 
 
 if __name__ == "__main__":
