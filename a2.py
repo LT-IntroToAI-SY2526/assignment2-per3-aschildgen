@@ -14,56 +14,47 @@ def match(pattern: List[str], source: List[str]) -> List[str]:
         None if the pattern and source do not "match" ELSE A list of matched words
         (words in the source corresponding to _'s or %'s, in the pattern, if any)
     """
-    sind = 0  # current index we are looking at in source list
-    pind = 0  # current index we are looking at in pattern list
-    result: List[str] = []  # to store substitutions we will return if matched
+    sind = 0  
+    pind = 0  
+    result: List[str] = []
 
-    # keep checking as long as we haven't hit the end of either pattern or source while
-    # pind is still a valid index OR sind is still a valid index (valid index means that
-    # the index is != to the length of the list)
-    def helper(pind: int, sind: int) -> Optional[List[str]]:
-        if pind == len(pattern) and sind == len(source):
-            return []
-        if pind == len(pattern):
+    while pind < len(pattern) or sind < len(source):
+
+
+        if pind == len(pattern) and sind < len(source):
             return None
-
-        # 2) if the current thing in the pattern is a %
-        if pind < len(pattern) and pattern[pind] == '%':
+        elif pattern[pind] == "%":
             if pind == len(pattern) - 1:
-                return [' '.join(source[sind:])]
-            next_pat = pattern[pind + 1]
-            for i in range(sind, len(source) + 1):
-                if i < len(source) and (next_pat == '_' or next_pat == source[i]):
-                    sub_res = helper(pind + 1, i)
-                    if sub_res is not None:
-                        matched = ' '.join(source[sind:i])
-                        return [matched] + sub_res
-                elif i == len(source) and next_pat != '%':
-                    return None
+                combined = " ".join(source[sind:])
+                result.append(combined)
+                return result
+            else:
+                pind += 1
+                accum = ""
+                while pattern[pind] != source[sind]:
+                    accum += source[sind] + " "
+                    sind += 1
+
+                    if sind == len(source):
+                        return None
+                
+                result.append(accum.strip())
+
+        elif sind == len(source):
+            return None
+        elif pattern[pind] == "_":
+            result.append(source[sind])
+            pind += 1
+            sind += 1
+        elif pattern[pind] == source[sind]:
+            pind += 1
+            sind += 1
+        else:
+
             return None
 
-        # 3) if we reached the end of the source but not the pattern
-        if sind == len(source):
-            return None
 
-        # 4) if the current thing in the pattern is an _
-        if pattern[pind] == '_':
-            sub_res = helper(pind + 1, sind + 1)
-            if sub_res is not None:
-                return [source[sind]] + sub_res
-            return None
-
-        # 5) if the current thing in the pattern is the same as the current thing in the
-        # source
-        if pattern[pind] == source[sind]:
-            return helper(pind + 1, sind + 1)
-
-        # 6) else : this will happen if none of the other conditions are met it
-        # indicates the current thing it pattern doesn't match the current thing in
-        # source
-        return None
-
-    return helper(0, 0)
+    return result
 
 
 if __name__ == "__main__":
@@ -87,8 +78,6 @@ if __name__ == "__main__":
         "z",
         "",
     ], "test 15 failed"
-    # this last case is a strange one, but it exposes an issue with the way we've
-    # written our match function
     assert match(["x", "%", "z"], ["x", "y", "z", "z", "z"]) == None, "test 16 failed"
 
     print("All tests passed!")
