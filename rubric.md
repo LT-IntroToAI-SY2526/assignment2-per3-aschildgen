@@ -1,7 +1,7 @@
 # Assignment 2 Rubric
 **Total Points: 10**
 
-**Name: [Insert name here]**
+**Name: [Alexander Schildgen]**
 
 ---
 
